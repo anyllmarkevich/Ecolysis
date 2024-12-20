@@ -257,14 +257,81 @@ impl PvaDeterministicOutput {
     }
     /// Return a vecotr of vectors, containing floating point values (Vec<Vec<f64>>), representing
     /// all the data from each step of the simulation for a determinisic model. Each item in the outer vector is the output of an
-    /// iteration of the simulation. The first item is the first iteration, the last itemn is the last iteration of the simulation. Each of the sub-vectors is a de-typed population vector, representing the demographics of a population.
-
+    /// iteration of the simulation. The first item is the first iteration, the last itemn is the
+    /// last iteration of the simulation. Each of the sub-vectors is a de-typed population vector,
+    /// representing the demographics of a population.
     pub fn return_numerical_output(&self) -> Vec<Vec<f64>> {
         let mut num_vec: Vec<Vec<f64>> = Vec::new();
         for i in &self.result {
             num_vec.push(i.get_vector().clone());
         }
         num_vec
+    }
+}
+
+pub struct PvaStochasticPopulation {
+    initial_population: PopulationVector,
+    projection_matrices: Vec<PopulationMatrix>,
+}
+impl PvaStochasticPopulation {
+    /// Return a Result enum containing a new PvaStochasticPopulation instance with the input of a Population Vector and a vector of Population Matrices.    
+    /// # Errors
+    /// Will return `Err<'static str>` if the lengths of the Population Vector and the Matrices do not match.
+    pub fn build(
+        initial_population: PopulationVector,
+        matrices: Vec<PopulationMatrix>,
+    ) -> Result<PvaStochasticPopulation, &'static str> {
+        let expected_lifestage_length = initial_population.get_lifestage_count();
+        for matrix in &matrices {
+            if matrix.get_lifestage_count() != expected_lifestage_length {
+                return Err("Population vector size does not match matrices.");
+            }
+        }
+        Ok(PvaStochasticPopulation {
+            initial_population: initial_population,
+            projection_matrices: matrices,
+        })
+    }
+    /// Return a Result enum containing a new PvaStochasticPopulation instance with the input of a vector containing f64 values (a population vector) and list of square sets of vector of vectors containing f64 values (a vector of population matrices).    
+    /// # Errors
+    /// Will return `Err<'static str>` if the lengths of the Population Vector the Matrices do not match.
+    /// ```
+    ///use ecolysis_cmd::populations::population_level_simulation::PvaDeterministicPopulation;
+    ///let new_population = PvaDeterministicPopulation::build_from_vectors(vec![12.0, 55.0, 172.0],
+    ///vec![
+    ///vec![
+    ///vec![0.0, 0.0, 0.9],
+    ///vec![0.6, 0.9, 0.0],
+    ///vec![0.0, 0.95, 0.99]
+    ///],
+    ///vec![
+    ///vec![0.0, 0.0, 0.7],
+    ///vec![0.7, 0.4, 0.0],
+    ///vec![0.0, 0.93, 0.95]
+    ///],
+    ///vec![
+    ///vec![0.0, 0.0, 0.8],
+    ///vec![0.7, 0.91, 0.0],
+    ///vec![0.0, 0.93, 0.98]
+    ///],
+    ///]);
+    /// ```
+    pub fn build_from_vectors(
+        initial_population: Vec<f64>,
+        matrices: Vec<Vec<Vec<f64>>>,
+    ) -> Result<PvaStochasticPopulation, &'static str> {
+        let mut formatted_matrices: Vec<PopulationMatrix> = vec![];
+        for matrix in matrices {
+            let temp_matrix = match PopulationMatrix::build(matrix) {
+                Ok(valid_matrix) => valid_matrix,
+                Err(e) => return Err(e),
+            };
+            formatted_matrices.push(temp_matrix)
+        }
+        PvaStochasticPopulation::build(
+            PopulationVector::new(initial_population),
+            formatted_matrices,
+        )
     }
 }
 
