@@ -296,8 +296,8 @@ impl PvaStochasticPopulation {
     /// # Errors
     /// Will return `Err<'static str>` if the lengths of the Population Vector the Matrices do not match.
     /// ```
-    ///use ecolysis_cmd::populations::population_level_simulation::PvaDeterministicPopulation;
-    ///let new_population = PvaDeterministicPopulation::build_from_vectors(vec![12.0, 55.0, 172.0],
+    ///use ecolysis_cmd::populations::population_level_simulation::PvaStochasticPopulation;
+    ///let new_population = PvaStochasticPopulation::build_from_vectors(vec![12.0, 55.0, 172.0],
     ///vec![
     ///vec![
     ///vec![0.0, 0.0, 0.9],
