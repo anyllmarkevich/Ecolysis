@@ -3,8 +3,9 @@
 /// This struct represents a population by a (typically integer) vector. Each value of the vector represents the number of individuals in a lifestage present in the population. For example, a population with 15 hatchlings, 8 juveniles, and 30 adults could be represented by this vector: `[40, 20, 100]`. This struct is meant to contain this type of information. The data is stored as f64 (floating point) values to accommodate conditions when decimal populations are desirable and facilitate calculations that may not return integer values.
 use rand::distributions::Uniform;
 use rand::{thread_rng, Rng};
+use statrs::statistics::{self, Statistics};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PopulationVector {
     vector: Vec<f64>,
     lifestage_count: u8,
@@ -344,7 +345,7 @@ impl PvaStochasticPopulation {
         let mut step_result: Vec<PopulationVector> = Vec::new();
         let mut iteration_result: Vec<Vec<PopulationVector>> = Vec::new();
         let mut rng = thread_rng();
-        let rand_generator = Uniform::new_inclusive(1, self.projection_matrices.len() as u32);
+        let rand_generator = Uniform::new_inclusive(1, self.projection_matrices.len() as u32 - 1);
         for _ in 1..=iterations {
             for _ in 1..=steps {
                 active_vector = self.projection_matrices[rng.sample(rand_generator) as usize].project_vector(&active_vector).expect("This error should not be possible. Mismatched Vector and Matrix lengths, or non-square Matrix. Please file a bug report.");
@@ -386,14 +387,28 @@ impl PvaStochasticOutput {
         let working_result = self.organize_by_time_step();
         let mut mean_vec: Vec<f64> = Vec::new();
         for step in working_result {
-            mean_vec.push(
-                step.iter()
-                    .map(|item| item.total_individuals())
-                    .sum::<f64>() as f64
-                    / self.steps as f64,
-            );
+            mean_vec.push(step.iter().map(|item| item.total_individuals()).mean());
+            //mean_vec.push(step.iter().map(|item| item.total_individuals()).sum::<f64>() as f64 / self.steps as f64,);
         }
         mean_vec
+    }
+    pub fn iteration_output_by_index(&self, index: usize) -> &Vec<PopulationVector> {
+        return &self.result[index];
+    }
+    pub fn result_typed_output(&self) -> &Vec<Vec<PopulationVector>> {
+        return &self.result;
+    }
+    pub fn result_vec_output(&self) -> Vec<Vec<&Vec<f64>>> {
+        return self
+            .result
+            .iter()
+            .map(|item1| {
+                item1
+                    .iter()
+                    .map(|iter2| iter2.get_vector())
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
     }
 }
 
@@ -457,5 +472,74 @@ mod tests {
             temp_vec = vec![];
         }
         assert_eq!(correct_result, clean_output[clean_output.len() - 1])
+    }
+    #[test]
+    fn pva_stochastic_output_summary_mean_test() {
+        let test_sim_output = PvaStochasticOutput::new(vec![
+            vec![
+                PopulationVector::new(vec![1.0, 2.0, 1.0]),
+                PopulationVector::new(vec![5.0, 25.0, 2.0]),
+            ],
+            vec![
+                PopulationVector::new(vec![1.0, 1.0, 1.0]),
+                PopulationVector::new(vec![3.0, 9.0, 10.0]),
+            ],
+            vec![
+                PopulationVector::new(vec![3.0, 1.0, 1.0]),
+                PopulationVector::new(vec![8.0, 8.0, 8.0]),
+            ],
+        ]);
+        assert_eq!(
+            test_sim_output.result_mean_total_population(),
+            vec![4.0, 26.0]
+        );
+    }
+    #[test]
+    fn pva_stochastic_simulation_test() {
+        let population_vec = PopulationVector::new(vec![40.0, 20.0, 100.0]);
+        let matrices: Vec<PopulationMatrix> = vec![
+            PopulationMatrix::build(vec![
+                vec![0.0, 0.0, 0.1],
+                vec![0.6, 0.8, 0.0],
+                vec![0.0, 0.8, 0.95],
+            ])
+            .unwrap(),
+            PopulationMatrix::build(vec![
+                vec![0.0, 0.0, 0.2],
+                vec![0.5, 0.9, 0.0],
+                vec![0.0, 0.7, 0.99],
+            ])
+            .unwrap(),
+            PopulationMatrix::build(vec![
+                vec![0.0, 0.0, 0.05],
+                vec![0.4, 0.5, 0.0],
+                vec![0.0, 0.3, 0.7],
+            ])
+            .unwrap(),
+            PopulationMatrix::build(vec![
+                vec![0.0, 0.0, 0.2],
+                vec![0.5, 0.75, 0.0],
+                vec![0.0, 0.6, 0.9],
+            ])
+            .unwrap(),
+            PopulationMatrix::build(vec![
+                vec![0.0, 0.0, 0.5],
+                vec![0.9, 0.9, 0.0],
+                vec![0.0, 0.95, 0.99],
+            ])
+            .unwrap(),
+        ];
+        let population = PvaStochasticPopulation::build(population_vec, matrices).unwrap();
+        let binding = population.stochastic_projection(100, 10);
+        let simulation_output = binding.result_vec_output();
+        for (count_i, i) in simulation_output.iter().enumerate() {
+            for (count_j, j) in simulation_output.iter().enumerate() {
+                if count_i != count_j {
+                    //println!("{:?}", i);
+                    //println!("{:?}", j);
+                    assert_ne!(i, j);
+                }
+            }
+        }
     }
 }
