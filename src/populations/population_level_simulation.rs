@@ -1,6 +1,9 @@
 //! This module contains functions to simulate population demographics (not including genetics) using forward-direction population-level simulations. Populations are represented by matrices and vectors containing demographic and behavioral information.
 
 /// This struct represents a population by a (typically integer) vector. Each value of the vector represents the number of individuals in a lifestage present in the population. For example, a population with 15 hatchlings, 8 juveniles, and 30 adults could be represented by this vector: `[40, 20, 100]`. This struct is meant to contain this type of information. The data is stored as f64 (floating point) values to accommodate conditions when decimal populations are desirable and facilitate calculations that may not return integer values.
+use rand::distributions::Uniform;
+use rand::{thread_rng, Rng};
+
 #[derive(Clone)]
 pub struct PopulationVector {
     vector: Vec<f64>,
@@ -208,10 +211,10 @@ impl PvaDeterministicPopulation {
     ///simulation_output.print_output();
     /// ```
 
-    pub fn deterministic_projection(&self, iterations: u32) -> PvaDeterministicOutput {
+    pub fn deterministic_projection(&self, steps: u32) -> PvaDeterministicOutput {
         let mut active_vector = self.initial_population.clone();
         let mut result: Vec<PopulationVector> = Vec::new();
-        for _ in 1..=iterations {
+        for _ in 1..=steps {
             active_vector = self.projection_matrix.project_vector(&active_vector).expect("This error should not be possible. Mismatched Vector and Matrix lengths, or non-square Matrix. Please file a bug report.");
             result.push(active_vector.clone());
         }
@@ -332,6 +335,37 @@ impl PvaStochasticPopulation {
             PopulationVector::new(initial_population),
             formatted_matrices,
         )
+    }
+    pub fn stochastic_projection(&self, steps: u32, iterations: u32) -> PvaStochasticOutput {
+        let mut active_vector = self.initial_population.clone();
+        let mut step_result: Vec<PopulationVector> = Vec::new();
+        let mut iteration_result: Vec<Vec<PopulationVector>> = Vec::new();
+        let mut rng = thread_rng();
+        let rand_generator = Uniform::new_inclusive(1, self.projection_matrices.len() as u32);
+        for _ in 1..=iterations {
+            for _ in 1..=steps {
+                active_vector = self.projection_matrices[rng.sample(rand_generator) as usize].project_vector(&active_vector).expect("This error should not be possible. Mismatched Vector and Matrix lengths, or non-square Matrix. Please file a bug report.");
+                step_result.push(active_vector.clone());
+            }
+            iteration_result.push(step_result.clone());
+            step_result = vec![];
+        }
+        return PvaStochasticOutput::new(iteration_result);
+    }
+}
+
+pub struct PvaStochasticOutput {
+    result: Vec<Vec<PopulationVector>>,
+    steps: u32,
+    iterations: u32,
+}
+impl PvaStochasticOutput {
+    pub fn new(simulation_output: Vec<Vec<PopulationVector>>) -> PvaStochasticOutput {
+        return PvaStochasticOutput {
+            steps: simulation_output[1].len() as u32,
+            iterations: simulation_output.len() as u32,
+            result: simulation_output,
+        };
     }
 }
 
