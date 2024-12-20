@@ -371,6 +371,9 @@ impl PvaStochasticOutput {
             result: simulation_output,
         };
     }
+    /// Refactors result data to be organized by time step, in the form of a 2-dimensional vector
+    /// containing population vectors. The output is structured such that the out outer layer is
+    /// the time-step of the simulation and the inner vector is the simulation iteration.
     fn organize_by_time_step(&self) -> Vec<Vec<PopulationVector>> {
         let mut new_result: Vec<Vec<PopulationVector>> = Vec::new();
         let mut temp_vec: Vec<PopulationVector> = Vec::new();
@@ -383,21 +386,27 @@ impl PvaStochasticOutput {
         }
         new_result
     }
+    /// Calculates the average population across simulation iterations, expressed as an f64 value, at each time step in the siulation.
     pub fn result_mean_total_population(&self) -> Vec<f64> {
         let working_result = self.organize_by_time_step();
         let mut mean_vec: Vec<f64> = Vec::new();
         for step in working_result {
             mean_vec.push(step.iter().map(|item| item.total_individuals()).mean());
-            //mean_vec.push(step.iter().map(|item| item.total_individuals()).sum::<f64>() as f64 / self.steps as f64,);
         }
         mean_vec
     }
+    /// Returns a specific iteration of the simulation using its index.
     pub fn iteration_output_by_index(&self, index: usize) -> &Vec<PopulationVector> {
         return &self.result[index];
     }
+    /// This function exports simulation output while retaining the type structure: a 2 dimensional
+    /// matrix of vectors containing Population Vector types. The outer vector is the simulation
+    /// iteration, while the inner vector is the time-step.
     pub fn result_typed_output(&self) -> &Vec<Vec<PopulationVector>> {
         return &self.result;
     }
+    /// This function converts all the output data into a 3-dimensional nested vector of f64
+    /// values.
     pub fn result_vec_output(&self) -> Vec<Vec<&Vec<f64>>> {
         return self
             .result
