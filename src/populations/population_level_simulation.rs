@@ -31,6 +31,9 @@ impl PopulationVector {
     pub fn get_lifestage_count(&self) -> u8 {
         return self.lifestage_count;
     }
+    pub fn total_individuals(&self) -> f64 {
+        return self.vector.iter().sum();
+    }
 }
 
 /// This struct represents the likelihood of different lifestages of an organism to survive, grow,
@@ -366,6 +369,31 @@ impl PvaStochasticOutput {
             iterations: simulation_output.len() as u32,
             result: simulation_output,
         };
+    }
+    fn organize_by_time_step(&self) -> Vec<Vec<PopulationVector>> {
+        let mut new_result: Vec<Vec<PopulationVector>> = Vec::new();
+        let mut temp_vec: Vec<PopulationVector> = Vec::new();
+        for step in 0..self.steps {
+            for item in &self.result {
+                temp_vec.push(item[step as usize].clone());
+            }
+            new_result.push(temp_vec);
+            temp_vec = vec![];
+        }
+        new_result
+    }
+    pub fn result_mean_total_population(&self) -> Vec<f64> {
+        let working_result = self.organize_by_time_step();
+        let mut mean_vec: Vec<f64> = Vec::new();
+        for step in working_result {
+            mean_vec.push(
+                step.iter()
+                    .map(|item| item.total_individuals())
+                    .sum::<f64>() as f64
+                    / self.steps as f64,
+            );
+        }
+        mean_vec
     }
 }
 
