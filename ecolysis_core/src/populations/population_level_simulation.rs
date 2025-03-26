@@ -46,7 +46,7 @@ impl PopulationVector {
 /// Index [1][1] is the number of lifestage 1 individuals that were in lifestage 1 the
 /// previous year.
 ///
-/// Index [1][2] is the number of of lifestage 1 indidviduals that were in lifestage 2 the year
+/// Index [1][2] is the number of lifestage 1 indidviduals that were in lifestage 2 the year
 /// before.
 ///
 /// Indeg [2][1] is the number of lifestage 2 individuals who were lifetage 1 individuals the
@@ -113,7 +113,7 @@ impl PopulationMatrix {
     /// Although this is theoretically impossible, the program could also panic if it recieves an out-of-bounds index request for the population vector. However, the function checks for this earlier in order to return a useful error code and prevent other mistakes, so should never occur.
     /// # Examples
     /// ```
-    /// use ecolysis_cmd::populations::population_level_simulation::{PopulationMatrix, PopulationVector}; // import relevant structs
+    /// use ecolysis_core::populations::population_level_simulation::{PopulationMatrix, PopulationVector}; // import relevant structs
     /// let popvector = PopulationVector::new(vec![150.0, 200.0, 33.0]); // create a population vector type
     /// let popmatrix = PopulationMatrix::build(vec![
     /// vec![0.25, 0.001, 0.75],
@@ -178,7 +178,7 @@ impl PvaDeterministicPopulation {
     /// # Errors
     /// Will return `Err<'static str>` if the lengths of the Population Vector the Matrix do not match.
     /// ```
-    ///use ecolysis_cmd::populations::population_level_simulation::PvaDeterministicPopulation;
+    ///use ecolysis_core::populations::population_level_simulation::PvaDeterministicPopulation;
     ///let new_population = PvaDeterministicPopulation::build_from_vectors(vec![12.0, 55.0, 172.0],
     ///vec![
     ///vec![0.0, 0.0, 0.9],
@@ -204,7 +204,7 @@ impl PvaDeterministicPopulation {
     /// lengths of Population Vector and Population Matrix do not match, although this situation should
     /// be prevented by checks when building a PVA Population instance.
     /// ```
-    ///use ecolysis_cmd::populations::population_level_simulation::PvaDeterministicPopulation;
+    ///use ecolysis_core::populations::population_level_simulation::PvaDeterministicPopulation;
     ///let new_population = PvaDeterministicPopulation::build_from_vectors(vec![12.0, 55.0, 172.0],
     ///vec![
     ///vec![0.0, 0.0, 0.9],
@@ -303,7 +303,7 @@ impl PvaStochasticPopulation {
     /// # Errors
     /// Will return `Err<'static str>` if the lengths of the Population Vector the Matrices do not match.
     /// ```
-    ///use ecolysis_cmd::populations::population_level_simulation::PvaStochasticPopulation;
+    ///use ecolysis_core::populations::population_level_simulation::PvaStochasticPopulation;
     ///let new_population = PvaStochasticPopulation::build_from_vectors(vec![12.0, 55.0, 172.0],
     ///vec![
     ///vec![

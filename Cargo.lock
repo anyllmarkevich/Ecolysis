@@ -57,7 +57,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ecolysis_cmd"
+name = "ecolysis_core"
 version = "0.1.0"
 dependencies = [
  "csv",
