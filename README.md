@@ -14,10 +14,10 @@ This project, written in Rust, aims to provide a modern and optimized toolset fo
 ## Crates
 
 Crates are the equivalent of packages in Rust. You can learn more about each crate in the README file in the crate's folder.
-- ecolysis_core: core functionality and logic for the project
+- [ecolysis_core](https://crates.io/crates/ecolysis_core): core functionality and logic for the project
 
 # Installation Instructions
-Coming with `Version 0.0.1`.
+[ecolysis_core](https://crates.io/crates/ecolysis_core) is avaialble on crates.io!
 
 # Build Instructions
 Check if Rust is installed by running `rustc --version` in your Command Line Interface. If you do not see a version number, [install Rust](https://www.rust-lang.org/tools/install) onto your system.
