@@ -1,4 +1,5 @@
 [![Rust](https://github.com/gallus-gallus/EcolysisCMD/actions/workflows/rust.yml/badge.svg)](https://github.com/gallus-gallus/EcolysisCMD/actions/workflows/rust.yml)
+![crates.io](https://img.shields.io/crates/v/ecolysis_core.svg)
 # Ecolysis: simulation and analysis of ecological systems
 This project, written in Rust, aims to provide a modern and optimized toolset for ecological simulation and analysis through command-line interfaces, libraries, and, eventually, a GUI for ecologists and managers.
 
