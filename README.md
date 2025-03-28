@@ -11,10 +11,15 @@ This project, written in Rust, aims to provide a modern and optimized toolset fo
 
 **Open Source!** Feel free to contribute, provide bug reports, etc.
 
-## Crates
+## Implementations
+### Crates
 
 Crates are the equivalent of packages in Rust. You can learn more about each crate in the README file in the crate's folder.
 - [ecolysis_core](https://crates.io/crates/ecolysis_core): core functionality and logic for the project
+
+### Other
+
+Ecolysis is in development as an R package in the [recolysis](https://github.com/anyllmarkevich/recolysis/) repo, although that repo only contains the code to interface with R as the underlying logic comes from the [ecolysis_core](https://crates.io/crates/ecolysis_core) crate (in this repo).
 
 # Installation Instructions
 [ecolysis_core](https://crates.io/crates/ecolysis_core) is avaialble on crates.io!
